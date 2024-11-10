@@ -1,3 +1,7 @@
+
+console.log("tareasRoutes.js cargado correctamente");
+
+
 // Importa las librerías necesarias
 const express = require('express');  // Importa Express
 const router = express.Router();  // Crea un enrutador para definir las rutas

@@ -27,7 +27,8 @@ app.get('/', (req, res) => {
 });
 
 // Rutas de la API
-app.use('/api', tareasRoutes);
+app.use('/', tareasRoutes);
+
 
 // Manejo de errores 404
 app.use((req, res) => {
