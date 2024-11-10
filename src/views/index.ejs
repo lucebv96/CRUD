@@ -22,6 +22,7 @@
                     <strong><%= programa.nombre %></strong>
                     <span>Votos: <span class="votos"><%= programa.votos %></span></span>
                     <button class="votar-btn" data-id="<%= programa.id %>">Votar</button>
+                    <button class="eliminar-btn" data-id="<%= programa.id %>">Eliminar</button>
                 </li>
             <% }); %>
         </ul>
