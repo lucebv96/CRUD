@@ -1,12 +1,15 @@
-// Importa sqlite3 y habilita el modo verbose para obtener más detalles en la consola
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
-// Conecta a una base de datos llamada 'database.db' en la carpeta 'src'
-const db = new sqlite3.Database('./src/database.db', (err) => {
+// Corregir la ruta de la base de datos usando path
+const dbPath = path.join(__dirname, '../database.db');
+
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error al conectar con la base de datos:', err.message);
     } else {
         console.log('Conectado a la base de datos SQLite.');
+        console.log('Ruta de la base de datos:', dbPath);
     }
 });
 
@@ -27,5 +30,4 @@ db.serialize(() => {
     });
 });
 
-// Exporta la conexión para usarla en otras partes de la aplicación
 module.exports = db;

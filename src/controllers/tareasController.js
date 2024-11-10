@@ -1,40 +1,35 @@
-// Importa la conexión a la base de datos
 const db = require('../db');
 
-// Controlador para obtener la lista de programas
+// Mantener los controladores existentes
 exports.obtenerProgramas = (req, res) => {
     const sql = "SELECT * FROM programas ORDER BY votos DESC";
     db.all(sql, (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
-            // Si la respuesta es JSON (API), devuelve JSON; si no, renderiza la vista.
-            if (res.json) {
-                res.json(rows);  // Devuelve la lista de programas en formato JSON (para la API)
+            if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+                res.json(rows);
             } else {
-                res.render('index', { programas: rows });  // Pasa 'programas' a la vista
+                res.render('index', { programas: rows });
             }
         }
     });
 };
 
-
-// Controlador para agregar un nuevo programa
 exports.crearPrograma = (req, res) => {
     const { nombre } = req.body;
     const sql = "INSERT INTO programas (nombre, votos) VALUES (?, ?)";
-    const params = [nombre, 0];  // Agrega el programa con 0 votos inicialmente
+    const params = [nombre, 0];
 
     db.run(sql, params, function(err) {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
-            res.status(201).json({ id: this.lastID, nombre, votos: 0 });  // Devuelve el nuevo programa creado
+            res.status(201).json({ id: this.lastID, nombre, votos: 0 });
         }
     });
 };
 
-// Controlador para votar por un programa
 exports.votarPrograma = (req, res) => {
     const { id } = req.params;
     const sql = "UPDATE programas SET votos = votos + 1 WHERE id = ?";
@@ -47,14 +42,14 @@ exports.votarPrograma = (req, res) => {
                 if (err) {
                     res.status(500).json({ error: err.message });
                 } else {
-                    res.json(row);  // Devuelve el programa actualizado con el nuevo conteo de votos
+                    res.json(row);
                 }
             });
         }
     });
 };
 
-// Controlador para actualizar los datos de un programa
+// Añadir el controlador que faltaba
 exports.actualizarPrograma = (req, res) => {
     const { id } = req.params;
     const { nombre } = req.body;
@@ -65,12 +60,12 @@ exports.actualizarPrograma = (req, res) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
-            res.json({ id, nombre });  // Devuelve el programa actualizado
+            res.json({ id: Number(id), nombre });
         }
     });
 };
 
-// Controlador para eliminar un programa
+// Mantener el controlador de eliminación si existe
 exports.eliminarPrograma = (req, res) => {
     const { id } = req.params;
     const sql = "DELETE FROM programas WHERE id = ?";
@@ -79,7 +74,7 @@ exports.eliminarPrograma = (req, res) => {
         if (err) {
             res.status(500).json({ error: err.message });
         } else {
-            res.json({ mensaje: "Programa eliminado" });  // Confirma la eliminación del programa
+            res.json({ mensaje: "Programa eliminado" });
         }
     });
 };

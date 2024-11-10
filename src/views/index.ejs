@@ -4,28 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Votación de Series y Dibujos Animados de los 90's</title>
-    <link rel="stylesheet" href="/css/styles.css"> <!-- Enlace a estilos CSS -->
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <h1>Vota por tu Serie Favorita de los 90's</h1>
+    <div class="container">
+        <h1>Vota por tu Serie Favorita de los 90's</h1>
 
-    <!-- Formulario para agregar un nuevo programa -->
-    <form id="form-agregar" action="/api/programas" method="POST">
-        <input type="text" id="nombre-programa" placeholder="Nombre del programa" required>
-        <button type="submit">Agregar Programa</button>
-    </form>
+        <form id="form-agregar">
+            <input type="text" id="nombre-programa" placeholder="Nombre del programa" required>
+            <button type="submit">Agregar Programa</button>
+        </form>
 
-    <h2>Programas en Votación</h2>
-    <!-- Lista de programas -->
-    <ul id="lista-programas">
-        <% programas.forEach(programa => { %>
-            <li id="programa-<%= programa.id %>">
-                <strong><%= programa.nombre %></strong> - Votos: <span class="votos"><%= programa.votos %></span>
-                <button class="votar-btn" data-id="<%= programa.id %>">Votar</button>
-            </li>
-        <% }); %>
-    </ul>
+        <h2>Programas en Votación</h2>
+        <ul id="lista-programas">
+            <% programas.forEach(function(programa) { %>
+                <li id="programa-<%= programa.id %>">
+                    <strong><%= programa.nombre %></strong>
+                    <span>Votos: <span class="votos"><%= programa.votos %></span></span>
+                    <button class="votar-btn" data-id="<%= programa.id %>">Votar</button>
+                </li>
+            <% }); %>
+        </ul>
+    </div>
 
-    <script src="/js/main.js"></script> <!-- Archivo de JavaScript para la funcionalidad -->
+    <script src="/js/main.js"></script>
 </body>
 </html>
