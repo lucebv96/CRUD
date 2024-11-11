@@ -53,15 +53,21 @@ exports.votarPrograma = (req, res) => {
 exports.actualizarPrograma = (req, res) => {
     const { id } = req.params;
     const { nombre } = req.body;
-    const sql = "UPDATE programas SET nombre = ? WHERE id = ?";
-    const params = [nombre, id];
 
-    db.run(sql, params, function(err) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json({ id: Number(id), nombre });
-        }
+    if (!nombre) {
+      return res.status(400).json({ error: 'Nombre es requerido' });
+    }
+
+    const sql = "UPDATE programas SET nombre = ? WHERE id = ?";
+    db.run(sql, [nombre, id], function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Error al actualizar programa' });
+      }
+      res.json({ 
+        id, 
+        nombre,
+        mensaje: 'Programa actualizado exitosamente' 
+      });
     });
 };
 

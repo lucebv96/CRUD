@@ -1,0 +1,18 @@
+Instrucciones de Uso para la Aplicación de Votación de Series de los 90's
+Esta aplicación permite agregar, votar y eliminar programas de series y dibujos animados con una lista que se ordena automáticamente según los votos.
+
+Requisitos Previos
+Node.js y npm deben estar instalados.
+SQLite no requiere instalación adicional; la base de datos se genera automáticamente.
+Pasos para Instalar y Ejecutar
+Clona el repositorio:
+
+git clone <URL-del-repositorio>
+cd <nombre-del-repositorio>
+
+Instala las dependencias:
+npm install
+
+
+Ejecuta la aplicación:
+node src/app.js

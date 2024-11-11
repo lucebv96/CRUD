@@ -1,90 +1,182 @@
-// Manejador de envío para el formulario de agregar programas
-document.getElementById('form-agregar').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const nombre = document.getElementById('nombre-programa').value;
-
-    const response = await fetch('/api/programas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre })
-    });
-
-    const nuevoPrograma = await response.json();
-    if (response.ok) {
-        agregarProgramaALista(nuevoPrograma);
-        document.getElementById('nombre-programa').value = '';  // Limpia el campo de entrada
-        reordenarProgramas(); // Reordenar después de agregar un nuevo programa
-    }
-});
-
-// Función para agregar un programa a la lista en la interfaz
-function agregarProgramaALista(programa) {
-    const lista = document.getElementById('lista-programas');
-    const item = document.createElement('li');
-    item.id = `programa-${programa.id}`;
-    item.innerHTML = `
-        <strong>${programa.nombre}</strong> - Votos: <span class="votos">${programa.votos}</span>
-        <button class="votar-btn" data-id="${programa.id}">Votar</button>
-        <button class="eliminar-btn" data-id="${programa.id}">Eliminar</button>
-    `;
-    lista.appendChild(item);
-
-    // Añadir eventos de clic para votar y eliminar
-    item.querySelector('.votar-btn').addEventListener('click', votarPorPrograma);
-    item.querySelector('.eliminar-btn').addEventListener('click', eliminarPrograma);
-}
-
-// Manejador de clic para los botones de votar
-async function votarPorPrograma(event) {
-    const id = event.target.getAttribute('data-id');
-    const response = await fetch(`/api/programas/${id}/votar`, { method: 'POST' });
-    const programaActualizado = await response.json();
-
-    if (response.ok) {
-        const votos = document.querySelector(`#programa-${id} .votos`);
-        votos.textContent = programaActualizado.votos;  // Actualiza el conteo de votos en la interfaz
-        reordenarProgramas(); // Reordenar después de votar
-    }
-}
-
-// Manejador de clic para los botones de eliminar
-async function eliminarPrograma(event) {
-    const id = event.target.getAttribute('data-id');
-    const response = await fetch(`/api/programas/${id}`, { method: 'DELETE' });
-
-    if (response.ok) {
-        const elementoAEliminar = document.getElementById(`programa-${id}`);
-        if (elementoAEliminar) {
-            elementoAEliminar.remove();  // Elimina el elemento de la interfaz
+document.addEventListener('DOMContentLoaded', () => {
+    const formularioSerie = document.getElementById('formularioSerie');
+    const listaSeries = document.getElementById('listaSeries');
+    const modal = document.getElementById('modalActualizar');
+    const formularioActualizar = document.getElementById('formularioActualizar');
+    const mensajeExito = document.getElementById('mensajeExito');
+    const mensajeError = document.getElementById('mensajeError');
+    let serieIdActual = null;
+  
+    // Función para agregar una serie nueva
+    formularioSerie.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById('nombreSerie').value.trim();
+  
+      try {
+        const response = await fetch('/api/programas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre })
+        });
+        const data = await response.json();
+  
+        if (!response.ok) {
+          throw new Error(data.error);
         }
-        reordenarProgramas(); // Reordenar después de eliminar
-    } else {
-        console.error('Error al eliminar el programa');
+  
+        agregarSerieALista(data);
+        document.getElementById('nombreSerie').value = ''; // Limpiar campo
+        mostrarMensajeExito('¡Serie agregada exitosamente!');
+      } catch (error) {
+        mensajeError.textContent = error.message;
+      }
+    });
+  
+    // Delegación de eventos para votar, eliminar y abrir el modal de actualización
+    listaSeries.addEventListener('click', (e) => {
+      const serieItem = e.target.closest('.serie-item');
+      if (!serieItem) return;
+      
+      const id = serieItem.dataset.id;
+  
+      if (e.target.classList.contains('boton-votar')) {
+        votarPorSerie(id);
+      }
+  
+      if (e.target.classList.contains('boton-eliminar')) {
+        eliminarSerie(id, serieItem);
+      }
+  
+      if (e.target.classList.contains('boton-actualizar')) {
+        abrirModalActualizar(id, serieItem);
+      }
+    });
+  
+    // Función para manejar el envío del formulario de actualización
+    formularioActualizar.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nuevoNombre = document.getElementById('nuevoNombre').value.trim();
+      const mensajeErrorModal = document.getElementById('mensajeErrorModal');
+  
+      try {
+        const response = await fetch(`/api/programas/${serieIdActual}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre: nuevoNombre })
+        });
+        const data = await response.json();
+  
+        if (!response.ok) {
+          throw new Error(data.error);
+        }
+  
+        actualizarNombreSerieEnLista(serieIdActual, nuevoNombre);
+        cerrarModalActualizar();
+        mostrarMensajeExito('Serie actualizada exitosamente!');
+      } catch (error) {
+        mensajeErrorModal.textContent = error.message;
+      }
+    });
+  
+    // Función para votar por una serie
+    async function votarPorSerie(id) {
+      try {
+        const response = await fetch(`/api/programas/${id}/votar`, { method: 'POST' });
+        const data = await response.json();
+  
+        if (response.ok) {
+          actualizarVotosSerie(data);
+        } else {
+          console.error('Error al votar:', data.error);
+        }
+      } catch (error) {
+        console.error('Error al votar:', error);
+      }
     }
-}
-
-// Función para reordenar los programas según la cantidad de votos
-function reordenarProgramas() {
-    const lista = document.getElementById('lista-programas');
-    const items = Array.from(lista.children);
-
-    // Ordena los elementos por la cantidad de votos (de mayor a menor)
-    items.sort((a, b) => {
+  
+    // Función para eliminar una serie
+    async function eliminarSerie(id, serieItem) {
+      try {
+        const response = await fetch(`/api/programas/${id}`, { method: 'DELETE' });
+  
+        if (response.ok) {
+          serieItem.remove(); // Eliminar de la interfaz
+          mostrarMensajeExito('Serie eliminada exitosamente!');
+        } else {
+          const data = await response.json();
+          throw new Error(data.error);
+        }
+      } catch (error) {
+        mensajeError.textContent = error.message;
+      }
+    }
+  
+    // Función para abrir el modal de actualización
+    function abrirModalActualizar(id, serieItem) {
+      serieIdActual = id;
+      const nombreActual = serieItem.querySelector('.nombre-serie').textContent;
+      document.getElementById('nuevoNombre').value = nombreActual;
+      modal.classList.add('activo');
+    }
+  
+    // Función para cerrar el modal de actualización
+    function cerrarModalActualizar() {
+      modal.classList.remove('activo');
+      document.getElementById('nuevoNombre').value = '';
+      document.getElementById('mensajeErrorModal').textContent = '';
+    }
+  
+    // Función para actualizar el nombre de la serie en la lista
+    function actualizarNombreSerieEnLista(id, nuevoNombre) {
+      const serieItem = document.querySelector(`[data-id="${id}"]`);
+      serieItem.querySelector('.nombre-serie').textContent = nuevoNombre;
+    }
+  
+    // Función para agregar una serie a la lista
+    function agregarSerieALista(serie) {
+      const li = document.createElement('li');
+      li.className = 'serie-item';
+      li.dataset.id = serie.id;
+      li.innerHTML = `
+        <span class="nombre-serie">${serie.nombre}</span>
+        <div class="controles">
+          <span class="votos">${serie.votos} votos</span>
+          <button class="boton-votar">Votar</button>
+          <button class="boton-actualizar">Actualizar</button>
+          <button class="boton-eliminar">Eliminar</button>
+        </div>
+      `;
+      listaSeries.appendChild(li);
+    }
+  
+    // Función para actualizar los votos de una serie en la lista
+    function actualizarVotosSerie(serie) {
+      const serieItem = document.querySelector(`[data-id="${serie.id}"]`);
+      serieItem.querySelector('.votos').textContent = `${serie.votos} votos`;
+      reordenarSeriesPorVotos();
+    }
+  
+    // Función para reordenar las series según el número de votos
+    function reordenarSeriesPorVotos() {
+      const series = Array.from(listaSeries.children);
+      series.sort((a, b) => {
         const votosA = parseInt(a.querySelector('.votos').textContent);
         const votosB = parseInt(b.querySelector('.votos').textContent);
         return votosB - votosA;
-    });
-
-    // Borra la lista actual y vuelve a insertar los elementos en el nuevo orden
-    lista.innerHTML = '';
-    items.forEach(item => lista.appendChild(item));
-}
-
-// Agrega los eventos de clic para votar y eliminar en cada programa al cargar la página
-document.querySelectorAll('.votar-btn').forEach(button => {
-    button.addEventListener('click', votarPorPrograma);
-});
-
-document.querySelectorAll('.eliminar-btn').forEach(button => {
-    button.addEventListener('click', eliminarPrograma);
-});
+      });
+      series.forEach(serie => listaSeries.appendChild(serie));
+    }
+  
+    // Función para mostrar mensajes de éxito
+    function mostrarMensajeExito(mensaje) {
+      mensajeExito.textContent = mensaje;
+      mensajeExito.style.display = 'block';
+      setTimeout(() => {
+        mensajeExito.style.display = 'none';
+      }, 3000);
+    }
+  
+    // Cerrar modal cuando se hace clic en el botón "Cancelar"
+    document.querySelector('.boton-cancelar').addEventListener('click', cerrarModalActualizar);
+  });
+  

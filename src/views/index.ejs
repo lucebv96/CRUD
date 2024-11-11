@@ -1,33 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Votación de Series y Dibujos Animados de los 90's</title>
-    <link rel="stylesheet" href="/css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Votación de Series y Dibujos Animados de los 90's</title>
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Vota por tu Serie Favorita de los 90's</h1>
+  <div class="contenedor">
+    <h1>¡Vota por tu Serie Favorita de los 90's!</h1>
 
-        <form id="form-agregar">
-            <input type="text" id="nombre-programa" placeholder="Nombre del programa" required>
-            <button type="submit">Agregar Programa</button>
-        </form>
+    <form id="formularioSerie">
+      <input type="text" id="nombreSerie" placeholder="Nombre de la serie" required>
+      <button type="submit">Agregar Serie</button>
+    </form>
+    <div id="mensajeExito" style="display: none;"></div>
+    <div id="mensajeError"></div>
 
-        <h2>Programas en Votación</h2>
-        <ul id="lista-programas">
-            <% programas.forEach(function(programa) { %>
-                <li id="programa-<%= programa.id %>">
-                    <strong><%= programa.nombre %></strong>
-                    <span>Votos: <span class="votos"><%= programa.votos %></span></span>
-                    <button class="votar-btn" data-id="<%= programa.id %>">Votar</button>
-                    <button class="eliminar-btn" data-id="<%= programa.id %>">Eliminar</button>
-                </li>
-            <% }); %>
-        </ul>
+    <ul id="listaSeries">
+      <% programas.forEach(function(programa) { %>
+        <li data-id="<%= programa.id %>" class="serie-item">
+          <span class="nombre-serie"><%= programa.nombre %></span>
+          <div class="controles">
+            <span class="votos"><%= programa.votos %> votos</span>
+            <button class="boton-votar">Votar</button>
+            <button class="boton-actualizar">Actualizar</button>
+            <button class="boton-eliminar">Eliminar</button>
+          </div>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+
+  <div id="modalActualizar" class="modal">
+    <div class="modal-contenido">
+      <h2>Actualizar Serie</h2>
+      <form id="formularioActualizar">
+        <input type="text" id="nuevoNombre" placeholder="Nuevo nombre" required>
+        <div class="controles">
+          <button type="submit">Guardar</button>
+          <button type="button" class="boton-cancelar">Cancelar</button>
+        </div>
+      </form>
+      <div id="mensajeErrorModal"></div>
     </div>
+  </div>
 
-    <script src="/js/main.js"></script>
+  <script src="/js/main.js"></script>
 </body>
 </html>
