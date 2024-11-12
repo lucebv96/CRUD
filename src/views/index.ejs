@@ -9,15 +9,18 @@
 <body>
   <div class="contenedor">
     <h1>¡Vota por tu Serie Favorita de los 90's!</h1>
+    <p class="descripcion">Agrega y vota por tus series y dibujos animados favoritos de los 90's. ¡Los más votados aparecerán primero!</p>
 
-    <form id="formularioSerie">
-      <input type="text" id="nombreSerie" placeholder="Nombre de la serie" required>
+    <form id="formularioSerie" class="formulario">
+      <div class="input-grupo">
+        <input type="text" id="nombreSerie" placeholder="Nombre de la serie" required>
+      </div>
       <button type="submit">Agregar Serie</button>
     </form>
-    <div id="mensajeExito" style="display: none;"></div>
-    <div id="mensajeError"></div>
+    <div id="mensajeExito" class="mensaje-exito" style="display: none;"></div>
+    <div id="mensajeError" class="error"></div>
 
-    <ul id="listaSeries">
+    <ul id="listaSeries" class="lista-series">
       <% programas.forEach(function(programa) { %>
         <li data-id="<%= programa.id %>" class="serie-item">
           <span class="nombre-serie"><%= programa.nombre %></span>
@@ -35,14 +38,14 @@
   <div id="modalActualizar" class="modal">
     <div class="modal-contenido">
       <h2>Actualizar Serie</h2>
-      <form id="formularioActualizar">
+      <form id="formularioActualizar" class="formulario">
         <input type="text" id="nuevoNombre" placeholder="Nuevo nombre" required>
         <div class="controles">
           <button type="submit">Guardar</button>
           <button type="button" class="boton-cancelar">Cancelar</button>
         </div>
       </form>
-      <div id="mensajeErrorModal"></div>
+      <div id="mensajeErrorModal" class="error"></div>
     </div>
   </div>
 
